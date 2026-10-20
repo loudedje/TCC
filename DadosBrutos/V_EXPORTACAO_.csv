@@ -71,6 +71,7 @@
 2025;18050000;Cacau em pó, sem adição de açúcar ou outros edulcorantes;Angola;43;1
 2025;19023000;Outras massas alimentícias;Guiné-Bissau;42;6
 2025;09041200;Pimenta (do gênero Piper), triturada ou em pó;Guiné-Bissau;42;3
+2025;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Guiné-Bissau;42;3
 2025;09096120;Sementes de badiana (anis-estrelado), não triturado nem em pó;São Tomé e Príncipe;31;1
 2025;19021900;Outras massas alimentícias não cozidas, nem recheadas, nem preparadas de outro modo;São Tomé e Príncipe;30;10
 2025;07129090;"Outros produtos hortícolas; misturas de produtos hortícolas, secos, inclusive pedaços, fatias, etc";Guiné-Bissau;22;2
@@ -163,6 +164,7 @@
 2024;19041000;Produtos à base de cereais, obtidos por expansão ou por torrefação;Angola;62;15
 2024;09041200;Pimenta (do gênero Piper), triturada ou em pó;Angola;59;10
 2024;20059900;Outros produtos hortícolas, preparados ou conservados, exceto em vinagre ou em ácido acético, não congelados;Guiné-Bissau;56;13
+2024;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Angola;52;10
 2024;08011100;Cocos, frescos ou secos, dessecados;Guiné-Bissau;50;7
 2024;18061000;Cacau em pó, com adição de açúcar ou outros edulcorantes;Cabo Verde;47;10
 2024;09042200;Pimentões e pimentas dos gêneros Capsicum ou Pimenta, triturados ou em pó;Guiné-Bissau;45;3
@@ -255,9 +257,12 @@
 2023;21039029;Outros condimentos e temperos, compostos;Cabo Verde;234;180
 2023;09062000;Canela e flores de caneleira, trituradas ou em pó;Moçambique;213;4
 2023;09061100;Canela (Cinnamomum zeylanicum blume) e flores de caneleira, não trituradas nem em pó;Angola;212;6
+2023;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Moçambique;207;6
 2023;09041200;Pimenta (do gênero Piper), triturada ou em pó;Cabo Verde;198;12
 2023;09109900;Outras especiarias;Angola;157;4
+2023;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Cabo Verde;145;13
 2023;09061100;Canela (Cinnamomum zeylanicum blume) e flores de caneleira, não trituradas nem em pó;Moçambique;142;2
+2023;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Angola;137;9
 2023;12079990;Outras sementes e frutos oleaginosos, mesmo triturados;Angola;123;27
 2023;17019100;Outros açúcares de cana, beterraba, com aromatizante corante;Cabo Verde;96;18
 2023;09101200;Gengibre, triturado ou em pó;Cabo Verde;86;5
@@ -322,6 +327,7 @@
 2022;19019090;Outras preparações alimentícias de farinhas, etc, cacau < 40%;Moçambique;1859;536
 2022;18061000;Cacau em pó, com adição de açúcar ou outros edulcorantes;Angola;1787;815
 2022;12079990;Outras sementes e frutos oleaginosos, mesmo triturados;Angola;1550;247
+2022;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Angola;1290;96
 2022;20052000;Batatas, preparados ou conservados, exceto em vinagre ou em ácido acético, não congelados;Moçambique;1197;280
 2022;09109900;Outras especiarias;Angola;1180;96
 2022;28363000;Hidrogenocarbonato (bicarbonato) de sódio;Angola;1171;470
@@ -411,6 +417,7 @@
 2021;09101200;Gengibre, triturado ou em pó;Angola;484;2
 2021;09062000;Canela e flores de caneleira, trituradas ou em pó;Angola;475;66
 2021;19019090;Outras preparações alimentícias de farinhas, etc, cacau < 40%;Cabo Verde;436;204
+2021;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Angola;418;34
 2021;09096110;Sementes de anis (erva-doce), não trituradas nem em pó;Angola;413;45
 2021;21039029;Outros condimentos e temperos, compostos;Angola;383;10
 2021;09096120;Sementes de badiana (anis-estrelado), não triturado nem em pó;Angola;338;15
@@ -494,6 +501,7 @@
 2020;09096110;Sementes de anis (erva-doce), não trituradas nem em pó;Angola;369;45
 2020;11081200;Amido de milho;Cabo Verde;341;384
 2020;12040090;Outras sementes de linho (linhaça), mesmo trituradas;Angola;327;79
+2020;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Angola;315;29
 2020;11041200;Grãos de aveia, esmagados ou em flocos;Moçambique;302;65
 2020;07129090;"Outros produtos hortícolas; misturas de produtos hortícolas, secos, inclusive pedaços, fatias, etc";Angola;247;31
 2020;19030000;Tapioca e seus sucedâneos preparados a partir de féculas, em flocos, grumos, grãos, pérolas ou formas semelhantes;Angola;239;100
@@ -722,6 +730,7 @@
 2017;18050000;Cacau em pó, sem adição de açúcar ou outros edulcorantes;Cabo Verde;339;41
 2017;21069021;Pós para a fabricação de pudins, em embalagens imediatas de conteúdo inferior ou igual a 1 kg;Moçambique;338;56
 2017;09041100;Pimenta (do gênero Piper), não triturada nem em pó;Angola;320;42
+2017;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;São Tomé e Príncipe;311;50
 2017;11041200;Grãos de aveia, esmagados ou em flocos;São Tomé e Príncipe;255;120
 2017;09092100;Sementes de coentro, não trituradas nem em pó;Moçambique;250;5
 2017;08011100;Cocos, frescos ou secos, dessecados;Cabo Verde;220;18
@@ -860,6 +869,7 @@
 2015;11081200;Amido de milho;Angola;1466;780
 2015;11081200;Amido de milho;Moçambique;1350;654
 2015;21039029;Outros condimentos e temperos, compostos;Angola;1322;512
+2015;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Angola;964;10
 2015;11029000;Farinha de outros cereais;Cabo Verde;936;336
 2015;11029000;Farinha de outros cereais;Angola;929;271
 2015;20059900;Outros produtos hortícolas, preparados ou conservados, exceto em vinagre ou em ácido acético, não congelados;Moçambique;912;80
@@ -926,6 +936,7 @@
 2014;19030000;Tapioca e seus sucedâneos preparados a partir de féculas, em flocos, grumos, grãos, pérolas ou formas semelhantes;Angola;4911;1782
 2014;19041000;Produtos à base de cereais, obtidos por expansão ou por torrefação;Cabo Verde;4712;708
 2014;09062000;Canela e flores de caneleira, trituradas ou em pó;Angola;4100;338
+2014;12119010;Orégano (Origanum vulgare) fresco ou seco, para perfumaria, medicina, etc.;Angola;3250;138
 2014;21039029;Outros condimentos e temperos, compostos;Angola;3223;832
 2014;21021090;Outras leveduras vivas;Angola;2957;510
 2014;20059900;Outros produtos hortícolas, preparados ou conservados, exceto em vinagre ou em ácido acético, não congelados;Cabo Verde;2670;1440

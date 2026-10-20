@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import caso, pais with context %}
+
+{% block titulo %}Países{% endblock %}
+{% block cabecalho %}Países PALOP{% endblock %}
+{% block intro %}
+  <p class="intro">O perfil econômico de cada mercado e a situação dele nos produtos do catálogo. Clique num país para
+  ver o perfil completo.</p>
+{% endblock %}
+
+{% block conteudo %}
+<section style="margin-top: 0">
+  <h2>Perfil dos mercados</h2>
+  {% if caracteristicas is none %}
+    <p class="nota">Os indicadores dos países ainda não estão disponíveis.</p>
+  {% else %}
+  <div class="rolagem">
+    <table class="tabela">
+      <thead>
+        <tr><th class="ordenavel">País</th>{% for chave in caracteristicas.columns if chave in variaveis %}<th class="ordenavel num">{{ INDICADORES[chave].nome if chave in INDICADORES else chave }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for nome, linha in caracteristicas.iterrows() %}
+          <tr data-href="{{ url_for('pais', iso=CODIGO_DO_PAIS[nome]) }}">
+            <td>{{ pais(nome) }}</td>
+            {% for chave in caracteristicas.columns if chave in variaveis %}
+              <td class="num" data-valor="{{ linha[chave] }}">{{ linha[chave]|indicador(chave) }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="nota" style="margin-top: 6px">Fontes: Banco Mundial (WDI e WGI) e PNUD.</p>
+  {% endif %}
+</section>
+
+<section>
+  <h2>Situação nos produtos do catálogo</h2>
+  <p class="nota">Em quantos dos {{ paises[0].casos.values()|sum }} produtos cada país está em cada situação.</p>
+  <div class="rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>País</th>
+          <th class="num">Mercado nº 1</th>
+          {% for nome in CASOS %}<th class="num">{{ caso(nome) }}</th>{% endfor %}
+          <th class="num">Oportunidades novas</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in paises %}
+          <tr data-href="{{ url_for('pais', iso=p.iso) }}">
+            <td>{{ pais(p.nome) }}</td>
+            <td class="num">{{ p.primeiros }}</td>
+            {% for nome in CASOS %}<td class="num">{{ p.casos[nome] or '—' }}</td>{% endfor %}
+            <td class="num">{{ p.herdados }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="nota" style="margin-top: 8px">As oportunidades novas já estão contadas nas colunas de situação: são
+  produtos que o país ainda não compra, mas que um país de perfil parecido já compra.</p>
+</section>
+{% endblock %}

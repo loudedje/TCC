@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import caso, pais with context %}
+
+{% block titulo %}Produtos{% endblock %}
+{% block cabecalho %}Produtos{% endblock %}
+{% block intro %}
+  <p class="intro">Os {{ produtos|length }} produtos do catálogo, com os dois mercados prioritários de cada um.
+  Clique num produto para ver a ordem completa dos países e o histórico de vendas.</p>
+{% endblock %}
+
+{% block conteudo %}
+{% set fora_do_catalogo = produtos|rejectattr('linhas')|list|length %}
+<div class="painel" style="margin-top: 0">
+<div class="filtros">
+  <input id="busca" type="search" placeholder="Buscar por descrição ou NCM" autocomplete="off">
+  <select id="filtro-linha" aria-label="Linha do catálogo">
+    <option value="">Todas as linhas</option>
+    {% for linha in linhas %}
+      <option value="{{ linha }}" {{ 'selected' if linha == linha_escolhida }}>{{ linha|title }}</option>
+    {% endfor %}
+    {% if fora_do_catalogo %}<option value="__fora">Fora do catálogo</option>{% endif %}
+  </select>
+  <select id="filtro-pais" aria-label="Mercado nº 1">
+    <option value="">Qualquer mercado nº 1</option>
+    {% for nome in PAISES.values() %}<option value="{{ nome }}">{{ nome }}</option>{% endfor %}
+  </select>
+  <label><input type="checkbox" id="filtro-heranca"> Só com oportunidade em mercado novo</label>
+  <span class="nota contador" id="contador"></span>
+</div>
+
+<div class="rolagem">
+  <table class="tabela" id="tabela-produtos">
+    <thead>
+      <tr>
+        <th class="ordenavel">NCM</th>
+        <th class="ordenavel">Produto</th>
+        <th class="ordenavel">Linha Apti</th>
+        <th>Mercado nº 1</th>
+        <th>Mercado nº 2</th>
+        <th class="ordenavel num">Países que já compram</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in produtos %}
+        <tr data-href="{{ url_for('produto', ncm=p.ncm) }}"
+            data-texto="{{ (p.ncm ~ ' ' ~ p.descricao)|lower }}"
+            data-linhas="{{ p.linhas|join('|') }}"
+            data-primeiro="{{ p.primeiro }}"
+            data-heranca="{{ p.herdados }}">
+          <td class="cod">{{ p.ncm }}</td>
+          <td title="{{ p.descricao }}">{{ p.descricao|curto(64) }}</td>
+          <td>{{ p.linhas|map('title')|join(', ') or '—' }}</td>
+          <td>{{ pais(p.primeiro) }}<br>{{ caso(p.caso_primeiro) }}</td>
+          <td>{{ pais(p.segundo) }}<br>{{ caso(p.caso_segundo) }}</td>
+          <td class="num" data-valor="{{ p.com_historico }}">{{ p.com_historico }} de 5</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="nota" id="sem-resultado" hidden>Nenhum produto com esses filtros.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const busca = document.getElementById('busca');
+  const linha = document.getElementById('filtro-linha');
+  const pais = document.getElementById('filtro-pais');
+  const heranca = document.getElementById('filtro-heranca');
+  const linhas = Array.from(document.querySelectorAll('#tabela-produtos tbody tr'));
+
+  function filtrar() {
+    const termo = busca.value.trim().toLowerCase();
+    let visiveis = 0;
+    linhas.forEach((tr) => {
+      const linhasProduto = tr.dataset.linhas ? tr.dataset.linhas.split('|') : [];
+      let ok = !termo || tr.dataset.texto.includes(termo);
+      if (linha.value === '__fora') ok = ok && linhasProduto.length === 0;
+      else if (linha.value) ok = ok && linhasProduto.includes(linha.value);
+      if (pais.value) ok = ok && tr.dataset.primeiro === pais.value;
+      if (heranca.checked) ok = ok && tr.dataset.heranca !== '0';
+      tr.hidden = !ok;
+      if (ok) visiveis++;
+    });
+    document.getElementById('sem-resultado').hidden = visiveis > 0;
+    document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} produtos`;
+  }
+
+  [busca, linha, pais, heranca].forEach(el => el.addEventListener('input', filtrar));
+  filtrar();
+</script>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% from '_macros.html' import icone %}
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Visão geral{% endblock %} — Apti · Mercados PALOP</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/estilo.css') }}">
+</head>
+
+<body>
+  <aside class="lateral">
+    <a class="marca" href="{{ url_for('painel') }}">
+      <strong>Apti · Mercados PALOP</strong>
+      <small>Inteligência de exportação</small>
+    </a>
+    <nav class="menu">
+      {% for grupo, itens in MENU %}
+      <div class="menu-grupo">{{ grupo }}</div>
+      {% for endpoint, rotulo, ico in itens %}
+      <a href="{{ url_for(endpoint) }}" class="{{ 'ativo' if menu_ativo == endpoint }}">{{ icone(ico) }}<span>{{ rotulo
+          }}</span></a>
+      {% endfor %}
+      {% endfor %}
+    </nav>
+    <div class="lateral-rodape">Exportações do Brasil {{ periodo }}<br>Fonte: ComexStat (MDIC)</div>
+  </aside>
+  <div class="fundo-menu" onclick="document.body.classList.remove('menu-aberto')"></div>
+
+  <div class="pagina">
+    <main>
+      <button class="botao-menu" type="button" aria-label="Abrir menu"
+        onclick="document.body.classList.toggle('menu-aberto')">{{ icone('menu') }} Menu</button>
+
+      {% with mensagens = get_flashed_messages(with_categories=true) %}
+      {% for categoria, mensagem in mensagens %}
+      <div class="aviso aviso-{{ categoria }}">{{ mensagem }}</div>
+      {% endfor %}
+      {% endwith %}
+
+      <div class="cabecalho-pagina">
+        {% block caminho %}{% endblock %}
+        <h1>{% block cabecalho %}{% endblock %}</h1>
+        {% block intro %}{% endblock %}
+        {% block acoes %}{% endblock %}
+      </div>
+
+      {% block conteudo %}{% endblock %}
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+  <script src="{{ url_for('static', filename='js/sistema.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+
+</html>

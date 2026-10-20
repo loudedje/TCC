@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import caso, pais with context %}
+
+{% block titulo %}Visão geral{% endblock %}
+{% block cabecalho %}Onde vender o catálogo Apti nos PALOP{% endblock %}
+{% block intro %}
+<p class="intro">Para cada produto do catálogo, os cinco países africanos de língua portuguesa aparecem em ordem de
+  prioridade, com base no que cada um comprou do Brasil entre {{ periodo }}. Escolha um produto na
+  <a href="{{ url_for('produtos') }}">lista de produtos</a> ou um país em <a href="{{ url_for('paises') }}">Países</a>.</p>
+{% endblock %}
+
+{% block conteudo %}
+<dl class="resumo">
+  <div>
+    <dt>Produtos analisados</dt>
+    <dd>{{ resumo.produtos }}</dd>
+  </div>
+  <div>
+    <dt>Mercados avaliados</dt>
+    <dd>{{ resumo.paises }}</dd>
+  </div>
+  <div>
+    <dt>Oportunidades em mercados novos</dt>
+    <dd>{{ resumo.herdados }}</dd>
+  </div>
+  <div>
+    <dt>Exportado pelo Brasil aos PALOP</dt>
+    <dd>US$ {{ resumo.valor_total|compacto }}</dd>
+  </div>
+</dl>
+
+<section>
+  <h2>Exportações do Brasil aos PALOP por ano</h2>
+  <p class="nota">Soma dos {{ resumo.produtos }} produtos do catálogo, em US$ FOB.</p>
+  <div class="grafico"><canvas id="grafico-anos"></canvas></div>
+</section>
+
+<section>
+  <h2>Mercados</h2>
+  <div class="rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th class="ordenavel">País</th>
+          <th class="ordenavel num">Importado do Brasil</th>
+          <th class="ordenavel num">Mercado nº 1 em</th>
+          <th class="ordenavel num">Já compra</th>
+          <th class="ordenavel num">Oportunidades novas</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in paises %}
+        <tr data-href="{{ url_for('pais', iso=p.iso) }}">
+          <td>{{ pais(p.nome) }}</td>
+          <td class="num" data-valor="{{ p.valor_total }}">{{ p.valor_total|moeda }}</td>
+          <td class="num" data-valor="{{ p.primeiros }}">{{ p.primeiros }} produtos</td>
+          <td class="num" data-valor="{{ p.com_historico }}">{{ p.com_historico }} produtos</td>
+          <td class="num" data-valor="{{ p.herdados }}">{{ p.herdados or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="nota" style="margin-top: 8px">Angola é o mercado nº 1 na maioria dos produtos porque já compra quase todo o
+    catálogo do Brasil. Nos outros países, a melhor porta de entrada muda de produto para produto.
+    <strong>Oportunidades novas</strong> são produtos que o país ainda não compra, mas que um país de perfil parecido já compra.</p>
+</section>
+
+<div class="duas-colunas">
+  <section>
+    <h2>Situação dos mercados</h2>
+    <p class="nota">Cada produto em cada país, conforme o histórico de compras do Brasil.</p>
+    {% set total = casos.values()|sum %}
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Situação</th>
+          <th>O que significa</th>
+          <th class="num">%</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for nome, n in casos.items() %}
+        <tr>
+          <td>{{ caso(nome) }}</td>
+          <td class="nota">{{ CASOS[nome].definicao|capitalize }}</td>
+          <td class="num">{{ (n / total * 100)|numero(0) ~ '%' if total else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Produtos mais exportados</h2>
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th class="num">#</th>
+          <th>Produto</th>
+          <th class="num">Valor {{ periodo }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in top %}
+        <tr data-href="{{ url_for('produto', ncm=item.ncm) }}">
+          <td class="num">{{ loop.index }}</td>
+          <td title="{{ item.descricao }}"><a href="{{ url_for('produto', ncm=item.ncm) }}">{{ item.descricao|curto(52)
+              }}</a></td>
+          <td class="num">US$ {{ item.valor|compacto }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const porAno = {{ por_ano| tojson }};
+  const CORES = {{ CORES_PAISES| tojson }};
+
+  new Chart(document.getElementById('grafico-anos'), {
+    type: 'bar',
+    data: {
+      labels: porAno.anos,
+      datasets: Object.entries(porAno.series).map(([pais, valores]) => ({
+        label: pais, data: valores, backgroundColor: CORES[pais],
+      })),
+    },
+    options: {
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, ticks: { callback: v => 'US$ ' + Sistema.compacto(v) } },
+      },
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${Sistema.moeda(c.parsed.y)}` } },
+      },
+    },
+  });
+</script>
+{% endblock %}

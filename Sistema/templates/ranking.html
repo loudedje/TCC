@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import caso with context %}
+
+{% block titulo %}Ranking por produto{% endblock %}
+{% block cabecalho %}Ranking dos países por produto{% endblock %}
+{% block intro %}
+  <p class="intro">Os {{ produtos|length }} produtos e os cinco países numa só tabela, ordenados só pelo histórico de
+  compras de cada país: primeiro quem compra todo ano, depois quem está em crescimento, quem compra ocasionalmente,
+  quem parou e, por último, quem não compra. O número é a posição do país naquele produto e a cor mostra a situação.</p>
+{% endblock %}
+
+{% block conteudo %}
+<div class="painel" style="margin-top: 0">
+<div class="filtros">
+  <input id="busca" type="search" placeholder="Buscar produto ou NCM" autocomplete="off">
+  {% if linhas_catalogo %}
+  <select id="filtro-linha" aria-label="Linha do catálogo">
+    <option value="">Todas as linhas</option>
+    {% for linha in linhas_catalogo %}<option value="{{ linha }}">{{ linha|title }}</option>{% endfor %}
+  </select>
+  {% endif %}
+  <select id="destaque-posicao" aria-label="Prioridade">
+    <option value="">Todas as prioridades</option>
+    {% for n in range(1, 6) %}<option value="{{ n }}">Só {{ n }}º mercado</option>{% endfor %}
+  </select>
+  <select id="destaque-caso" aria-label="Situação">
+    <option value="">Todas as situações</option>
+    {% for nome, info in CASOS.items() %}<option value="{{ nome }}">{{ info.rotulo }}</option>{% endfor %}
+  </select>
+  <span class="nota contador" id="contador"></span>
+</div>
+<p class="nota">
+  {% for nome in CASOS %}{{ caso(nome) }}{{ ' · ' if not loop.last }}{% endfor %}
+</p>
+
+<div class="rolagem">
+  <table class="tabela matriz" id="matriz">
+    <thead>
+      <tr>
+        <th>NCM</th>
+        <th>Produto</th>
+        {% for nome in PAISES.values() %}<th class="pais"><a href="{{ url_for('pais', iso=CODIGO_DO_PAIS[nome]) }}">{{ nome }}</a></th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for linha in produtos %}
+        <tr data-texto="{{ (linha.ncm ~ ' ' ~ linha.descricao)|lower }}" data-linhas="{{ linha.linhas|join('|') }}">
+          <td class="cod"><a href="{{ url_for('produto', ncm=linha.ncm) }}">{{ linha.ncm }}</a></td>
+          <td title="{{ linha.descricao }}"><a href="{{ url_for('produto', ncm=linha.ncm) }}">{{ linha.descricao|curto(55) }}</a></td>
+          {% for nome in PAISES.values() %}
+            {% set c = linha.celulas.get(nome) %}
+            {% if c %}
+              <td class="celula {{ 'primeiro' if c.posicao == 1 }}" style="--c: {{ CASOS[c.caso].cor }}"
+                  data-caso="{{ c.caso }}" data-posicao="{{ c.posicao }}"
+                  title="{{ nome }}: {{ c.posicao }}º, {{ CASOS[c.caso].rotulo|lower }}">{{ c.posicao }}º</td>
+            {% else %}
+              <td></td>
+            {% endif %}
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="nota" id="sem-resultado" hidden>Nenhum produto com esses filtros.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const busca = document.getElementById('busca');
+  const linhaSel = document.getElementById('filtro-linha');
+  const posicao = document.getElementById('destaque-posicao');
+  const casoSel = document.getElementById('destaque-caso');
+  const linhas = Array.from(document.querySelectorAll('#matriz tbody tr'));
+
+  function aplicar() {
+    const termo = busca.value.trim().toLowerCase();
+    let visiveis = 0;
+    linhas.forEach((tr) => {
+      const linhasProduto = tr.dataset.linhas ? tr.dataset.linhas.split('|') : [];
+      const ok = (!termo || tr.dataset.texto.includes(termo))
+        && (!linhaSel || !linhaSel.value || linhasProduto.includes(linhaSel.value));
+      tr.hidden = !ok;
+      if (ok) visiveis++;
+    });
+    document.querySelectorAll('#matriz td.celula').forEach((td) => {
+      const apagar = (posicao.value && td.dataset.posicao !== posicao.value)
+        || (casoSel.value && td.dataset.caso !== casoSel.value);
+      td.classList.toggle('apagada', !!apagar);
+    });
+    document.getElementById('sem-resultado').hidden = visiveis > 0;
+    document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} produtos`;
+  }
+
+  [busca, linhaSel, posicao, casoSel].filter(Boolean).forEach(el => el.addEventListener('input', aplicar));
+  aplicar();
+</script>
+{% endblock %}

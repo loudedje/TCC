@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import caso, pais with context %}
+
+{% block titulo %}{{ p.nome }}{% endblock %}
+{% block caminho %}
+  <div class="caminho"><a href="{{ url_for('paises') }}">Países</a> › {{ p.nome }}
+    <span style="margin-left: 14px">Outros:
+      {% for iso, nome in PAISES.items() if iso != p.iso %}<a href="{{ url_for('pais', iso=iso) }}">{{ nome }}</a>{{ ' · ' if not loop.last }}{% endfor %}
+    </span>
+  </div>
+{% endblock %}
+{% block cabecalho %}{{ p.nome }}{% endblock %}
+{% block intro %}
+  <p class="intro">Comprou {{ p.valor_total|moeda }} do Brasil nos produtos do catálogo ({{ periodo }}). É o mercado
+  nº 1 em {{ p.primeiros }} dos {{ p.produtos|length }} produtos, já compra {{ p.com_historico }} deles
+  {%- if p.herdados %} e tem {{ p.herdados }} oportunidades em produtos que ainda não compra{% endif %}.</p>
+{% endblock %}
+
+{% block conteudo %}
+<div class="duas-colunas">
+  <section style="margin-top: 0">
+    <h2>Indicadores</h2>
+    {% if p.indicadores %}
+      <table class="tabela">
+        <thead><tr><th>Indicador</th><th class="num">Valor</th></tr></thead>
+        <tbody>
+          {% for chave, info in INDICADORES.items() if chave in p.indicadores %}
+            <tr>
+              <td>{{ info.nome }}</td>
+              <td class="num">{{ p.indicadores[chave]|indicador(chave) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="nota" style="margin-top: 6px">Fontes: Banco Mundial e PNUD.</p>
+    {% else %}
+      <p class="nota">Os indicadores deste país ainda não estão disponíveis.</p>
+    {% endif %}
+  </section>
+
+  <section style="margin-top: 0">
+    <h2>Comparado aos outros PALOP</h2>
+    {% if p.z %}
+      <div class="grafico baixo"><canvas id="grafico-radar"></canvas></div>
+      <p class="nota" style="margin-top: 6px">A linha tracejada é a média dos cinco países: para fora dela, o indicador
+      está acima da média.</p>
+    {% else %}
+      <p class="nota">Sem dados de indicadores.</p>
+    {% endif %}
+  </section>
+</div>
+
+<div class="duas-colunas">
+  <section>
+    <h2>Mercados com perfil parecido</h2>
+    {% if p.parecidos %}
+      <ol class="texto" style="margin: 0; padding-left: 22px">
+        {% for outro in p.parecidos %}
+          <li>{{ pais(outro.nome) }}</li>
+        {% endfor %}
+      </ol>
+      <p class="nota" style="margin-top: 8px">Do mais parecido para o menos parecido. Um produto que {{ p.nome }} já
+      compra vira oportunidade nos dois primeiros desta lista, se eles ainda não comprarem.</p>
+    {% else %}
+      <p class="nota">Sem dados de indicadores.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Situação dos produtos neste mercado</h2>
+    <table class="tabela">
+      <thead><tr><th>Situação</th><th class="num">Produtos</th></tr></thead>
+      <tbody>
+        {% for nome, n in p.casos.items() %}
+          <tr><td>{{ caso(nome) }}</td><td class="num">{{ n }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+
+<section>
+  <h2>Importações do Brasil por ano</h2>
+  <p class="nota">Soma dos produtos do catálogo, em US$ FOB.</p>
+  <div class="grafico baixo"><canvas id="grafico-anos"></canvas></div>
+</section>
+
+<section>
+  <h2>Prioridade de {{ p.nome }} em cada produto</h2>
+  <div class="filtros">
+    <select id="filtro-posicao" aria-label="Prioridade">
+      <option value="">Todas as prioridades</option>
+      {% for n in range(1, 6) %}<option value="{{ n }}">{{ n }}º mercado</option>{% endfor %}
+    </select>
+  </div>
+  <div class="rolagem">
+    <table class="tabela" id="tabela-pais">
+      <thead>
+        <tr>
+          <th class="ordenavel num">Prioridade</th>
+          <th class="ordenavel">NCM</th>
+          <th class="ordenavel">Produto</th>
+          <th class="ordenavel">Situação</th>
+          <th class="ordenavel num">Anos com compra</th>
+          <th class="ordenavel num">Comprado do Brasil</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in p.produtos %}
+          <tr data-href="{{ url_for('produto', ncm=item.ncm) }}" data-posicao="{{ item.posicao }}">
+            <td class="num" data-valor="{{ item.posicao }}">{{ item.posicao }}º</td>
+            <td class="cod">{{ item.ncm }}</td>
+            <td title="{{ item.descricao }}">{{ item.descricao|curto(64) }}</td>
+            <td data-valor="{{ item.caso }}">
+              {{ caso(item.caso) }}
+              {% if item.herdado %}<br><span class="herdado">oportunidade: perfil parecido com {{ (item.parecidos_que_compram or [item.herdado_de])|join(' e ') }}</span>{% endif %}
+            </td>
+            <td class="num" data-valor="{{ item.anos_ativos }}">{{ item.anos_ativos }}</td>
+            <td class="num" data-valor="{{ item.valor }}">{{ item.valor|moeda }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const p = {{ p|tojson }};
+  const rotulos = {{ rotulos_radar|tojson }};
+  const variaveis = {{ variaveis|tojson }};
+
+  if (p.z) {
+    new Chart(document.getElementById('grafico-radar'), {
+      type: 'radar',
+      data: {
+        labels: rotulos,
+        datasets: [
+          {
+            label: p.nome,
+            data: variaveis.map(v => p.z[v]),
+            borderColor: p.cor,
+            backgroundColor: Sistema.transparente(p.cor, .15),
+            borderWidth: 2, pointRadius: 2,
+          },
+          {
+            label: 'Média dos PALOP',
+            data: variaveis.map(() => 0),
+            borderColor: '#8a939b', borderDash: [4, 4], borderWidth: 1,
+            backgroundColor: 'transparent', pointRadius: 0,
+          },
+        ],
+      },
+      options: {
+        scales: { r: { suggestedMin: -2, suggestedMax: 2, ticks: { display: false } } },
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.r > 0.25 ? 'acima da média' : c.parsed.r < -0.25 ? 'abaixo da média' : 'na média'}` } },
+        },
+      },
+    });
+  }
+
+  new Chart(document.getElementById('grafico-anos'), {
+    type: 'bar',
+    data: { labels: p.anos, datasets: [{ label: 'US$ FOB', data: p.serie, backgroundColor: p.cor }] },
+    options: {
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + Sistema.moeda(c.parsed.y) } } },
+      scales: { x: { grid: { display: false } }, y: { ticks: { callback: v => 'US$ ' + Sistema.compacto(v) } } },
+    },
+  });
+
+  document.getElementById('filtro-posicao').addEventListener('input', (e) => {
+    document.querySelectorAll('#tabela-pais tbody tr').forEach((tr) => {
+      tr.hidden = e.target.value !== '' && tr.dataset.posicao !== e.target.value;
+    });
+  });
+</script>
+{% endblock %}

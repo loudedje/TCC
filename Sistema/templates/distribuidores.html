@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pais with context %}
+
+{% block titulo %}Distribuidores{% endblock %}
+{% block cabecalho %}Distribuidores{% endblock %}
+{% block intro %}
+  <p class="intro">Empresas do setor alimentício nos cinco PALOP que podem distribuir os produtos da Apti. Como o
+  catálogo é todo de alimento seco, o mesmo distribuidor atende qualquer produto. Os países mais promissores aparecem
+  primeiro.</p>
+{% endblock %}
+
+{% block acoes %}
+  {% if candidatos %}
+  <a class="botao principal" href="{{ url_for('baixar_distribuidores') }}">Baixar planilha (Excel)</a>
+  {% endif %}
+{% endblock %}
+
+{% block conteudo %}
+{% if not candidatos %}
+<section>
+  <p class="nota">A lista de distribuidores ainda está em preparação.</p>
+</section>
+{% else %}
+
+<dl class="resumo">
+  <div><dt>Empresas na lista</dt><dd>{{ candidatos|length }}</dd></div>
+  <div><dt>Países cobertos</dt><dd>{{ candidatos|map(attribute='pais')|unique|list|length }} de 5</dd></div>
+  <div><dt>Atualizado em</dt><dd>{{ data_coleta }}</dd></div>
+</dl>
+
+<section>
+  <h2>Empresas por país</h2>
+  <p class="nota">Angola publica a lista oficial de importadores certificados pela alfândega e tem mais empresas
+  mapeadas, por isso aparece com mais nomes. Nos outros países há menos informação pública: poucos nomes aqui não
+  significam mercado pequeno, e sim que a prospecção ali exige mais pesquisa local.</p>
+  <div class="rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>País</th>
+          <th class="num">Produtos em que é mercado nº 1 ou nº 2</th>
+          <th class="num">Empresas</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in por_pais %}
+          <tr>
+            <td>{{ pais(linha.pais) }}</td>
+            <td class="num">{{ linha.forca }}</td>
+            <td class="num">{{ linha.quantos if linha.quantos else '—' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>Lista de empresas</h2>
+  <div class="filtros">
+    <input id="busca" type="search" placeholder="Buscar empresa" autocomplete="off">
+    <select id="filtro-pais" aria-label="País">
+      <option value="">Todos os países</option>
+      {% for nome in PAISES.values() %}<option value="{{ nome }}">{{ nome }}</option>{% endfor %}
+    </select>
+    <select id="filtro-canal" aria-label="Canal">
+      <option value="">Todos os canais</option>
+      {% for canal in canais %}<option value="{{ canal }}">{{ canal|capitalize }}</option>{% endfor %}
+    </select>
+    <span class="nota contador" id="contador"></span>
+  </div>
+  <div class="rolagem">
+    <table class="tabela" id="tabela-distribuidores">
+      <thead>
+        <tr>
+          <th class="ordenavel">Empresa</th>
+          <th class="ordenavel">País</th>
+          <th class="ordenavel">Canal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in candidatos %}
+          {% set unidades = c.unidades|int if c.unidades else 1 %}
+          <tr data-texto="{{ c.nome|lower }}"
+              data-pais="{{ c.pais }}" data-canal="{{ c.canal }}">
+            <td>
+              <strong>{{ c.nome }}</strong>
+              {% if unidades > 1 %}<br><span class="nota">rede com {{ unidades }} lojas</span>{% endif %}
+              {% if 'AGT' in (c.fonte or '') %}<br><span class="selo">importador certificado</span>{% endif %}
+            </td>
+            <td data-valor="{{ c.pais }}">{{ pais(c.pais) }}</td>
+            <td data-valor="{{ c.canal }}">{{ c.canal|capitalize }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="nota" id="sem-resultado" hidden>Nenhuma empresa com esses filtros.</p>
+  <p class="nota" style="margin-top: 10px">Os nomes vêm de fontes públicas (lista de importadores certificados da
+  alfândega de Angola e OpenStreetMap). São empresas para prospectar: o interesse e as condições comerciais precisam
+  ser confirmados no contato.</p>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const busca = document.getElementById('busca');
+  if (busca) {
+    const filtroPais = document.getElementById('filtro-pais');
+    const filtroCanal = document.getElementById('filtro-canal');
+    const linhas = Array.from(document.querySelectorAll('#tabela-distribuidores tbody tr'));
+
+    function filtrar() {
+      const termo = busca.value.trim().toLowerCase();
+      let visiveis = 0;
+      linhas.forEach((tr) => {
+        const ok = (!termo || tr.dataset.texto.includes(termo))
+          && (!filtroPais.value || tr.dataset.pais === filtroPais.value)
+          && (!filtroCanal.value || tr.dataset.canal === filtroCanal.value);
+        tr.hidden = !ok;
+        if (ok) visiveis++;
+      });
+      document.getElementById('sem-resultado').hidden = visiveis > 0;
+      document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} empresas`;
+    }
+
+    [busca, filtroPais, filtroCanal].forEach(el => el.addEventListener('input', filtrar));
+    filtrar();
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import caso, pais with context %}
+
+{% block titulo %}Perfil parecido entre mercados{% endblock %}
+{% block cabecalho %}Perfil parecido entre mercados{% endblock %}
+{% block intro %}
+  <p class="intro">Países com economia e consumo parecidos tendem a comprar produtos parecidos. Por isso, quando um país
+  já compra um produto do Brasil, os dois países de perfil mais parecido com ele que ainda não compram aparecem como
+  <strong>oportunidade em mercado novo</strong>. A comparação usa população, renda por habitante, urbanização,
+  estabilidade política, qualidade das regras de negócio e desenvolvimento humano.</p>
+{% endblock %}
+
+{% block conteudo %}
+<section style="margin-top: 0">
+  <h2>Quem é parecido com quem</h2>
+  <div class="rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th>Mercado</th>
+          <th>Mais parecido</th>
+          <th>Segundo mais parecido</th>
+          <th class="num">Oportunidades que gera</th>
+          <th class="num">Oportunidades que recebe</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in s.mercados %}
+          <tr>
+            <td><strong>{{ pais(m.nome) }}</strong></td>
+            <td>{{ pais(m.parecidos[0]) if m.parecidos|length > 0 else '—' }}</td>
+            <td>{{ pais(m.parecidos[1]) if m.parecidos|length > 1 else '—' }}</td>
+            <td class="num">{{ m.gera or '—' }}</td>
+            <td class="num">{{ m.recebe or '—' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="nota" style="margin-top: 8px"><strong>Gera:</strong> produtos que o país já compra e que viraram oportunidade
+  num país parecido com ele. <strong>Recebe:</strong> produtos que o país ainda não compra, mas que um país parecido
+  com ele já compra.</p>
+</section>
+
+<div class="duas-colunas">
+  <section>
+    <h2>Perfil dos cinco mercados</h2>
+    {% if s.z %}
+      <div class="grafico"><canvas id="grafico-radar"></canvas></div>
+      <p class="nota" style="margin-top: 6px">Quanto mais as formas se sobrepõem, mais parecidos são os países. Para fora
+      do centro, o indicador está acima da média dos cinco.</p>
+    {% else %}
+      <p class="nota">Os indicadores dos países ainda não estão disponíveis.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Como ler</h2>
+    <ul class="texto" style="margin: 0">
+      {% for m in s.mercados if m.parecidos %}
+        <li>{{ pais(m.nome) }} se parece mais com {{ pais(m.parecidos[0]) }}{% if m.parecidos|length > 1 %} e com {{ pais(m.parecidos[1]) }}{% endif %}.</li>
+      {% endfor %}
+    </ul>
+    <p class="nota" style="margin-top: 10px">A relação não é sempre de mão dupla. Um país pode estar entre os mais
+    parecidos de outro sem que o contrário aconteça, porque cada país olha para os dois mais próximos dele.</p>
+  </section>
+</div>
+
+<section>
+  <h2>Oportunidades em mercados novos</h2>
+  {% if s.oportunidades %}
+    <p class="nota">{{ s.oportunidades|length }} produtos que o país ainda não compra do Brasil, mas que um país de perfil
+    parecido já compra. Quando dois países parecidos já compram, aparecem os dois, e a situação mostrada é a do
+    mais parecido (o primeiro da lista).</p>
+    <div class="filtros">
+      <input id="busca" type="search" placeholder="Buscar produto ou NCM" autocomplete="off">
+      <select id="filtro-pais" aria-label="Mercado">
+        <option value="">Todos os mercados</option>
+        {% for m in s.mercados if m.recebe %}<option value="{{ m.nome }}">{{ m.nome }}</option>{% endfor %}
+      </select>
+      <span class="nota contador" id="contador"></span>
+    </div>
+    <div class="rolagem limitada">
+      <table class="tabela" id="tabela-oportunidades">
+        <thead>
+          <tr>
+            <th class="ordenavel">NCM</th>
+            <th class="ordenavel">Produto</th>
+            <th class="ordenavel">Mercado novo</th>
+            <th class="ordenavel">Parecido com</th>
+            <th class="ordenavel">Situação lá</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in s.oportunidades %}
+            <tr data-href="{{ url_for('produto', ncm=o.ncm) }}"
+                data-texto="{{ (o.ncm ~ ' ' ~ o.descricao)|lower }}" data-pais="{{ o.pais }}">
+              <td class="cod">{{ o.ncm }}</td>
+              <td title="{{ o.descricao }}">{{ o.descricao|curto(56) }}</td>
+              <td data-valor="{{ o.pais }}">{{ pais(o.pais) }}</td>
+              <td data-valor="{{ o.parecido_com|join(' e ') }}">
+                {%- for nome in o.parecido_com %}{{ pais(nome) }}{{ ' e ' if not loop.last }}{% endfor -%}
+              </td>
+              <td data-valor="{{ o.caso }}">{{ caso(o.caso) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="nota" id="sem-resultado" hidden>Nenhuma oportunidade com esses filtros.</p>
+  {% else %}
+    <p class="nota">Nenhuma oportunidade em mercado novo no momento.</p>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  {% if s.z %}
+  const z = {{ s.z|tojson }};
+  const rotulos = {{ rotulos_radar|tojson }};
+  const CORES = {{ CORES_PAISES|tojson }};
+  new Chart(document.getElementById('grafico-radar'), {
+    type: 'radar',
+    data: {
+      labels: rotulos,
+      datasets: Object.entries(z).map(([pais, valores]) => ({
+        label: pais,
+        data: valores,
+        borderColor: CORES[pais],
+        backgroundColor: 'transparent',
+        borderWidth: 2, pointRadius: 2,
+      })),
+    },
+    options: {
+      scales: { r: { suggestedMin: -2, suggestedMax: 2, ticks: { display: false } } },
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.r > 0.25 ? 'acima da média' : c.parsed.r < -0.25 ? 'abaixo da média' : 'na média'}` } },
+      },
+    },
+  });
+  {% endif %}
+
+  const busca = document.getElementById('busca');
+  if (busca) {
+    const filtroPais = document.getElementById('filtro-pais');
+    const linhas = Array.from(document.querySelectorAll('#tabela-oportunidades tbody tr'));
+
+    function filtrar() {
+      const termo = busca.value.trim().toLowerCase();
+      let visiveis = 0;
+      linhas.forEach((tr) => {
+        const ok = (!termo || tr.dataset.texto.includes(termo))
+          && (!filtroPais.value || tr.dataset.pais === filtroPais.value);
+        tr.hidden = !ok;
+        if (ok) visiveis++;
+      });
+      document.getElementById('sem-resultado').hidden = visiveis > 0;
+      document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} oportunidades`;
+    }
+
+    [busca, filtroPais].forEach(el => el.addEventListener('input', filtrar));
+    filtrar();
+  }
+</script>
+{% endblock %}

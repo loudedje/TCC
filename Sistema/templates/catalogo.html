@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Catálogo{% endblock %}
+{% block cabecalho %}Catálogo Apti{% endblock %}
+{% block intro %}
+  <p class="intro">As linhas de produtos da Apti e os códigos NCM de cada uma. {% if linhas %}São {{ linhas|length }} linhas, {{ linhas|map(attribute='grupos')|map('length')|sum }} grupos
+  e {{ resumo.ncms_catalogo }} NCMs diferentes{% if resumo.ncms_catalogo_cobertos < resumo.ncms_catalogo %},
+  dos quais {{ resumo.ncms_catalogo_cobertos }} têm vendas do Brasil aos PALOP{% endif %}. Clique num produto para ver
+  os mercados prioritários.{% endif %}</p>
+{% endblock %}
+
+{% block conteudo %}
+{% if not linhas %}
+  <p class="painel" style="margin-top: 0">O catálogo ainda não está disponível.</p>
+{% else %}
+{% set tem_fora = resumo.ncms_catalogo_cobertos < resumo.ncms_catalogo %}
+<div class="painel filtros" style="margin-top: 0; margin-bottom: 0">
+  <input id="busca" type="search" placeholder="Buscar linha, grupo, NCM ou produto" autocomplete="off">
+  {% if tem_fora %}<label><input type="checkbox" id="so-base"> Esconder produtos sem vendas</label>{% endif %}
+  <span class="nota">Ir para:
+    {% for linha in linhas %}<a href="#linha-{{ loop.index }}">{{ linha.nome|title }}</a>{{ ' · ' if not loop.last }}{% endfor %}
+  </span>
+</div>
+
+{% for linha in linhas %}
+  <section class="linha-catalogo" id="linha-{{ loop.index }}">
+    <h2>{{ linha.nome|title }}
+      {% if linha.cobertos < linha.total %}<span class="nota" style="font-weight: 400">· {{ linha.cobertos }} de {{ linha.total }} NCMs com vendas</span>{% endif %}
+    </h2>
+    <div class="rolagem">
+      <table class="tabela">
+        <thead>
+          <tr><th style="width: 18%">Grupo</th><th style="width: 10%">NCM</th><th>Produto</th></tr>
+        </thead>
+        <tbody>
+          {% for grupo in linha.grupos %}
+            {% for item in grupo.ncms %}
+              {% set prod = item.produto %}
+              <tr data-texto="{{ (linha.nome ~ ' ' ~ grupo.nome ~ ' ' ~ item.ncm ~ ' ' ~ (prod.descricao if prod else ''))|lower }}"
+                  data-base="{{ 1 if item.na_base else 0 }}"
+                  {% if prod %}data-href="{{ url_for('produto', ncm=item.ncm) }}"{% endif %}>
+                <td>{{ grupo.nome|title }}</td>
+                <td class="cod">{% if prod %}<a href="{{ url_for('produto', ncm=item.ncm) }}">{{ item.ncm }}</a>{% else %}{{ item.ncm }}{% endif %}</td>
+                {% if prod %}
+                  <td title="{{ prod.descricao }}">{{ prod.descricao|curto(70) }}</td>
+                {% else %}
+                  <td class="nota">Sem vendas do Brasil aos PALOP registradas para este NCM.</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endfor %}
+<p class="nota" id="sem-resultado" hidden>Nada encontrado.</p>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const busca = document.getElementById('busca');
+  const soBase = document.getElementById('so-base');
+
+  function filtrar() {
+    const termo = busca.value.trim().toLowerCase();
+    let total = 0;
+    document.querySelectorAll('section.linha-catalogo').forEach((secao) => {
+      let visiveis = 0;
+      secao.querySelectorAll('tbody tr').forEach((tr) => {
+        const ok = (!termo || tr.dataset.texto.includes(termo))
+          && (!soBase || !soBase.checked || tr.dataset.base === '1');
+        tr.hidden = !ok;
+        if (ok) visiveis++;
+      });
+      secao.hidden = visiveis === 0;
+      total += visiveis;
+    });
+    document.getElementById('sem-resultado').hidden = total > 0;
+  }
+
+  if (busca) [busca, soBase].filter(Boolean).forEach(el => el.addEventListener('input', filtrar));
+</script>
+{% endblock %}

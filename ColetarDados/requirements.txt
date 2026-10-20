@@ -1,0 +1,7 @@
+# Bibliotecas dos notebooks de coleta (o sistema web usa Sistema/requirements.txt)
+pandas>=2.0
+numpy
+matplotlib
+scikit-learn
+wbgapi
+requests

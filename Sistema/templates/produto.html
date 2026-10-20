@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import caso, pais with context %}
+
+{% block titulo %}NCM {{ p.ncm }}{% endblock %}
+{% block caminho %}<div class="caminho"><a href="{{ url_for('produtos') }}">Produtos</a> › NCM {{ p.ncm }}</div>{% endblock %}
+{% block cabecalho %}{{ p.descricao }}{% endblock %}
+{% block intro %}
+  <p class="intro">
+    NCM {{ p.ncm }} · {{ p.valor_total|moeda }} exportados aos PALOP entre {{ periodo }}
+    {%- if p.catalogo %} · Catálogo Apti:
+      {% for item in p.catalogo -%}
+        <a href="{{ url_for('produtos', linha=item.Linha) }}">{{ item.Linha|title }}</a> ({{ item.Grupo|title }}){{ ', ' if not loop.last }}
+      {%- endfor %}
+    {%- endif %}
+  </p>
+{% endblock %}
+
+{% block conteudo %}
+<section style="margin-top: 0">
+  <h2>Mercados em ordem de prioridade</h2>
+  <div class="rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th class="num">Prioridade</th>
+          <th>País</th>
+          <th>Situação</th>
+          <th>Por quê</th>
+          <th class="num">Comprado do Brasil</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in p.ranking %}
+          <tr>
+            <td class="num"><strong>{{ linha.posicao_final|int }}º</strong></td>
+            <td>{{ pais(linha['Países']) }}</td>
+            <td>
+              {{ caso(linha.caso_final) }}
+              {% if linha.herdado == 1 %}<br><span class="herdado">oportunidade: perfil parecido com {{ (linha.parecidos_que_compram or [linha.herdado_de])|join(' e ') }}</span>{% endif %}
+            </td>
+            <td>{{ linha.motivo }}</td>
+            <td class="num">{{ linha.valor_total|moeda if linha.valor_total else '—' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="nota" style="margin-top: 8px">Primeiro vêm os países que compram com regularidade, depois os que estão
+  começando a comprar e por último os que compram de vez em quando ou pararam. Um país que ainda não compra só aparece
+  como oportunidade quando tem perfil parecido com um país que já compra, e fica sempre atrás dos que já compram.</p>
+</section>
+
+<section>
+  <h2>Exportações do Brasil por ano</h2>
+  <div class="filtros">
+    <label>Medida
+      <select id="medida">
+        <option value="valor">US$ FOB</option>
+        <option value="kg">Quilograma líquido</option>
+      </select>
+    </label>
+    <label>Visualização
+      <select id="escala">
+        <option value="log">Realçar países pequenos</option>
+        <option value="linear">Valores proporcionais</option>
+      </select>
+    </label>
+  </div>
+  <div class="grafico"><canvas id="grafico-serie"></canvas></div>
+  <p class="nota" style="margin-top: 8px">Em "Realçar países pequenos" os mercados com valores baixos ficam visíveis ao
+  lado dos grandes, e os anos sem compra aparecem como falhas na linha.</p>
+</section>
+
+<section>
+  <h2>Vendas do Brasil por país</h2>
+  <div class="rolagem">
+    <table class="tabela">
+      <thead>
+        <tr>
+          <th class="ordenavel">País</th>
+          <th class="ordenavel num">Valor total</th>
+          <th class="ordenavel num">Participação</th>
+          <th class="ordenavel num">Quilos</th>
+          <th class="ordenavel num">US$/kg</th>
+          <th class="ordenavel num">Anos com compra</th>
+          <th class="ordenavel num">Último ano</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in p.por_pais %}
+          <tr>
+            <td>{{ pais(item.pais) }}</td>
+            <td class="num" data-valor="{{ item.valor }}">{{ item.valor|moeda }}</td>
+            <td class="num" data-valor="{{ item.valor }}">{{ (item.valor / p.valor_total * 100)|numero(1) ~ '%' if p.valor_total else '—' }}</td>
+            <td class="num" data-valor="{{ item.kg }}">{{ item.kg|numero }}</td>
+            <td class="num" data-valor="{{ item.preco_kg or 0 }}">{{ item.preco_kg|numero(2) if item.preco_kg else '—' }}</td>
+            <td class="num" data-valor="{{ item.anos_com }}">{{ item.anos_com }} de {{ p.anos|length }}</td>
+            <td class="num" data-valor="{{ item.ultimo_ano or 0 }}">{{ item.ultimo_ano or '—' }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="navegacao">
+  {% if p.anterior %}<a href="{{ url_for('produto', ncm=p.anterior) }}">‹ Produto anterior</a>{% else %}<span></span>{% endif %}
+  {% if p.proximo %}<a href="{{ url_for('produto', ncm=p.proximo) }}">Próximo produto ›</a>{% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const anos = {{ p.anos|tojson }};
+  const seriesValor = {{ p.series_valor|tojson }};
+  const seriesKg = {{ p.series_kg|tojson }};
+  const CORES = {{ CORES_PAISES|tojson }};
+  const medida = document.getElementById('medida');
+  const escala = document.getElementById('escala');
+  let grafico;
+
+  function desenhar() {
+    const emValor = medida.value === 'valor';
+    const log = escala.value === 'log';
+    const series = emValor ? seriesValor : seriesKg;
+    const formatar = emValor ? Sistema.moeda : v => Sistema.numero(v) + ' kg';
+    if (grafico) grafico.destroy();
+    grafico = new Chart(document.getElementById('grafico-serie'), {
+      type: 'line',
+      data: {
+        labels: anos,
+        datasets: Object.entries(series).map(([pais, valores]) => ({
+          label: pais,
+          // zero não existe na escala log: vira falha na linha
+          data: valores.map(v => (log && v <= 0) ? null : v),
+          borderColor: CORES[pais],
+          backgroundColor: CORES[pais],
+          borderWidth: 2,
+          pointRadius: 2.5,
+          spanGaps: false,
+        })),
+      },
+      options: {
+        interaction: { mode: 'index', intersect: false },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            type: log ? 'logarithmic' : 'linear',
+            beginAtZero: !log,
+            ticks: {
+              callback: (v) => {
+                // na escala log, só as potências de 10
+                if (log && Math.abs(Math.log10(v) - Math.round(Math.log10(v))) > 1e-9) return '';
+                return emValor ? 'US$ ' + Sistema.compacto(v) : Sistema.compacto(v) + ' kg';
+              },
+            },
+          },
+        },
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y == null ? 'sem exportação' : formatar(c.parsed.y)}` } },
+        },
+      },
+    });
+  }
+
+  [medida, escala].forEach(el => el.addEventListener('change', desenhar));
+  desenhar();
+</script>
+{% endblock %}
