@@ -3,9 +3,9 @@
 {% block titulo %}Catálogo{% endblock %}
 {% block cabecalho %}Catálogo Apti{% endblock %}
 {% block intro %}
-  <p class="intro">As linhas de produtos da Apti e os códigos NCM de cada uma. {% if linhas %}São {{ linhas|length }} linhas, {{ linhas|map(attribute='grupos')|map('length')|sum }} grupos
+  <p class="intro">As linhas de produtos da Apti e os códigos NCM de cada uma. {% if linhas %}São {{ linhas|length }} linhas, {{ linhas|map(attribute='grupos')|map('length')|sum }} grupos, {{ resumo.produtos_catalogo }} produtos
   e {{ resumo.ncms_catalogo }} NCMs diferentes{% if resumo.ncms_catalogo_cobertos < resumo.ncms_catalogo %},
-  dos quais {{ resumo.ncms_catalogo_cobertos }} têm vendas do Brasil aos PALOP{% endif %}. Clique num produto para ver
+  dos quais {{ resumo.ncms_catalogo_cobertos }} têm vendas do Brasil aos PALOP{% endif %}. Clique num NCM para ver
   os mercados prioritários.{% endif %}</p>
 {% endblock %}
 
@@ -15,8 +15,8 @@
 {% else %}
 {% set tem_fora = resumo.ncms_catalogo_cobertos < resumo.ncms_catalogo %}
 <div class="painel filtros" style="margin-top: 0; margin-bottom: 0">
-  <input id="busca" type="search" placeholder="Buscar linha, grupo, NCM ou produto" autocomplete="off">
-  {% if tem_fora %}<label><input type="checkbox" id="so-base"> Esconder produtos sem vendas</label>{% endif %}
+  <input id="busca" type="search" placeholder="Buscar linha, grupo, NCM ou descrição" autocomplete="off">
+  {% if tem_fora %}<label><input type="checkbox" id="so-base"> Esconder NCMs sem vendas</label>{% endif %}
   <span class="nota">Ir para:
     {% for linha in linhas %}<a href="#linha-{{ loop.index }}">{{ linha.nome|title }}</a>{{ ' · ' if not loop.last }}{% endfor %}
   </span>
@@ -30,7 +30,7 @@
     <div class="rolagem">
       <table class="tabela">
         <thead>
-          <tr><th style="width: 18%">Grupo</th><th style="width: 10%">NCM</th><th>Produto</th></tr>
+          <tr><th style="width: 18%">Grupo</th><th style="width: 10%">NCM</th><th>Descrição do NCM</th></tr>
         </thead>
         <tbody>
           {% for grupo in linha.grupos %}

@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import caso with context %}
 
-{% block titulo %}Ranking por produto{% endblock %}
-{% block cabecalho %}Ranking dos países por produto{% endblock %}
+{% block titulo %}Ranking por NCM{% endblock %}
+{% block cabecalho %}Ranking dos países por NCM{% endblock %}
 {% block intro %}
-  <p class="intro">Os {{ produtos|length }} produtos e os cinco países numa só tabela, ordenados só pelo histórico de
+  <p class="intro">Os {{ produtos|length }} NCMs e os cinco países numa só tabela, ordenados só pelo histórico de
   compras de cada país: primeiro quem compra todo ano, depois quem está em crescimento, quem compra ocasionalmente,
-  quem parou e, por último, quem não compra. O número é a posição do país naquele produto e a cor mostra a situação.</p>
+  quem parou e, por último, quem não compra. O número é a posição do país naquele NCM e a cor mostra a situação.</p>
 {% endblock %}
 
 {% block conteudo %}
 <div class="painel" style="margin-top: 0">
 <div class="filtros">
-  <input id="busca" type="search" placeholder="Buscar produto ou NCM" autocomplete="off">
+  <input id="busca" type="search" placeholder="Buscar NCM ou descrição" autocomplete="off">
   {% if linhas_catalogo %}
   <select id="filtro-linha" aria-label="Linha do catálogo">
     <option value="">Todas as linhas</option>
@@ -38,7 +38,7 @@
     <thead>
       <tr>
         <th>NCM</th>
-        <th>Produto</th>
+        <th>Descrição do NCM</th>
         {% for nome in PAISES.values() %}<th class="pais"><a href="{{ url_for('pais', iso=CODIGO_DO_PAIS[nome]) }}">{{ nome }}</a></th>{% endfor %}
       </tr>
     </thead>
@@ -62,7 +62,7 @@
     </tbody>
   </table>
 </div>
-<p class="nota" id="sem-resultado" hidden>Nenhum produto com esses filtros.</p>
+<p class="nota" id="sem-resultado" hidden>Nenhum NCM com esses filtros.</p>
 </div>
 {% endblock %}
 
@@ -90,7 +90,7 @@
       td.classList.toggle('apagada', !!apagar);
     });
     document.getElementById('sem-resultado').hidden = visiveis > 0;
-    document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} produtos`;
+    document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} NCMs`;
   }
 
   [busca, linhaSel, posicao, casoSel].filter(Boolean).forEach(el => el.addEventListener('input', aplicar));

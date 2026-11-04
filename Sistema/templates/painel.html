@@ -4,16 +4,20 @@
 {% block titulo %}Visão geral{% endblock %}
 {% block cabecalho %}Onde vender o catálogo Apti nos PALOP{% endblock %}
 {% block intro %}
-<p class="intro">Para cada produto do catálogo, os cinco países africanos de língua portuguesa aparecem em ordem de
-  prioridade, com base no que cada um comprou do Brasil entre {{ periodo }}. Escolha um produto na
-  <a href="{{ url_for('produtos') }}">lista de produtos</a> ou um país em <a href="{{ url_for('paises') }}">Países</a>.</p>
+<p class="intro">Para cada NCM do catálogo, os cinco países africanos de língua portuguesa aparecem em ordem de
+  prioridade, com base no que cada um comprou do Brasil entre {{ periodo }}. Escolha um NCM na
+  <a href="{{ url_for('produtos') }}">lista de NCMs</a> ou um país em <a href="{{ url_for('paises') }}">Países</a>.</p>
 {% endblock %}
 
 {% block conteudo %}
 <dl class="resumo">
   <div>
-    <dt>Produtos analisados</dt>
-    <dd>{{ resumo.produtos }}</dd>
+    <dt>Produtos do catálogo</dt>
+    <dd>{{ resumo.produtos_catalogo }}</dd>
+  </div>
+  <div>
+    <dt>NCMs analisados</dt>
+    <dd>{{ resumo.ncms }}</dd>
   </div>
   <div>
     <dt>Mercados avaliados</dt>
@@ -31,7 +35,7 @@
 
 <section>
   <h2>Exportações do Brasil aos PALOP por ano</h2>
-  <p class="nota">Soma dos {{ resumo.produtos }} produtos do catálogo, em US$ FOB.</p>
+  <p class="nota">Exportações de todas as empresas brasileiras nos {{ resumo.ncms }} NCMs do catálogo, em US$ FOB.</p>
   <div class="grafico"><canvas id="grafico-anos"></canvas></div>
 </section>
 
@@ -53,23 +57,20 @@
         <tr data-href="{{ url_for('pais', iso=p.iso) }}">
           <td>{{ pais(p.nome) }}</td>
           <td class="num" data-valor="{{ p.valor_total }}">{{ p.valor_total|moeda }}</td>
-          <td class="num" data-valor="{{ p.primeiros }}">{{ p.primeiros }} produtos</td>
-          <td class="num" data-valor="{{ p.com_historico }}">{{ p.com_historico }} produtos</td>
+          <td class="num" data-valor="{{ p.primeiros }}">{{ p.primeiros }} NCMs</td>
+          <td class="num" data-valor="{{ p.com_historico }}">{{ p.com_historico }} NCMs</td>
           <td class="num" data-valor="{{ p.herdados }}">{{ p.herdados or '—' }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  <p class="nota" style="margin-top: 8px">Angola é o mercado nº 1 na maioria dos produtos porque já compra quase todo o
-    catálogo do Brasil. Nos outros países, a melhor porta de entrada muda de produto para produto.
-    <strong>Oportunidades novas</strong> são produtos que o país ainda não compra, mas que um país de perfil parecido já compra.</p>
 </section>
 
 <div class="duas-colunas">
   <section>
     <h2>Situação dos mercados</h2>
-    <p class="nota">Cada produto em cada país, conforme o histórico de compras do Brasil.</p>
+    <p class="nota">Cada NCM em cada país, conforme o histórico de compras do Brasil.</p>
     {% set total = casos.values()|sum %}
     <table class="tabela">
       <thead>
@@ -92,12 +93,12 @@
   </section>
 
   <section>
-    <h2>Produtos mais exportados</h2>
+    <h2>NCMs mais exportados</h2>
     <table class="tabela">
       <thead>
         <tr>
           <th class="num">#</th>
-          <th>Produto</th>
+          <th>Descrição do NCM</th>
           <th class="num">Valor {{ periodo }}</th>
         </tr>
       </thead>

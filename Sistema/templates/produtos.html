@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% from '_macros.html' import caso, pais with context %}
 
-{% block titulo %}Produtos{% endblock %}
-{% block cabecalho %}Produtos{% endblock %}
+{% block titulo %}Produtos por NCM{% endblock %}
+{% block cabecalho %}Produtos por NCM{% endblock %}
 {% block intro %}
-  <p class="intro">Os {{ produtos|length }} produtos do catálogo, com os dois mercados prioritários de cada um.
-  Clique num produto para ver a ordem completa dos países e o histórico de vendas.</p>
+  <p class="intro">Os {{ resumo.produtos_catalogo }} produtos do catálogo estão agrupados em {{ produtos|length }} NCMs, o nível de detalhe dos dados de exportação. Cada linha mostra os dois mercados prioritários do NCM.
+  Clique num NCM para ver a ordem completa dos países e o histórico de vendas.</p>
 {% endblock %}
 
 {% block conteudo %}
@@ -33,7 +33,7 @@
     <thead>
       <tr>
         <th class="ordenavel">NCM</th>
-        <th class="ordenavel">Produto</th>
+        <th class="ordenavel">Descrição do NCM</th>
         <th class="ordenavel">Linha Apti</th>
         <th>Mercado nº 1</th>
         <th>Mercado nº 2</th>
@@ -58,7 +58,7 @@
     </tbody>
   </table>
 </div>
-<p class="nota" id="sem-resultado" hidden>Nenhum produto com esses filtros.</p>
+<p class="nota" id="sem-resultado" hidden>Nenhum NCM com esses filtros.</p>
 </div>
 {% endblock %}
 
@@ -84,7 +84,7 @@
       if (ok) visiveis++;
     });
     document.getElementById('sem-resultado').hidden = visiveis > 0;
-    document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} produtos`;
+    document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} NCMs`;
   }
 
   [busca, linha, pais, heranca].forEach(el => el.addEventListener('input', filtrar));

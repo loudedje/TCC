@@ -105,11 +105,11 @@ def explicar(linha):
     if linha['herdado'] == 1:
         origem = linha.get('parecidos_que_compram') or [linha['herdado_de']]
         verbo = 'já compram' if len(origem) > 1 else 'já compra'
-        return (f"Ainda não compra este produto do Brasil, mas tem perfil parecido com {' e '.join(origem)}, "
+        return (f"Ainda não compra este NCM do Brasil, mas tem perfil parecido com {' e '.join(origem)}, "
                 f"que {verbo}. É uma oportunidade de mercado novo.")
 
     if caso == 'nunca exportou':
-        return "Não compra este produto do Brasil e não tem perfil parecido com quem compra."
+        return "Não compra este NCM do Brasil e não tem perfil parecido com quem compra."
 
     anos = int(linha['anos_ativos'])
     if caso == 'continuidade':
@@ -121,7 +121,7 @@ def explicar(linha):
     if caso == 'intermitente':
         return (f"Comprou em {anos_texto(anos)}, com intervalos; ficou até "
                 f"{anos_texto(int(linha['maior_parada']))} seguidos sem comprar.")
-    return "Sem compras deste produto."
+    return "Sem compras deste NCM."
 
 
 class Dados:
@@ -198,8 +198,10 @@ class Dados:
             catalogo = pd.read_csv(ARQ_CATALOGO, dtype=str, encoding='utf-8-sig')
             # no catálogo alguns NCMs vêm com pontos (ex.: 2106.90.21)
             catalogo['ncm'] = catalogo['NCM'].str.replace(r'\D', '', regex=True).str.zfill(8)
+            self.total_produtos_catalogo = len(catalogo)
             self.catalogo = catalogo.drop_duplicates(['Linha', 'Grupo', 'ncm']).reset_index(drop=True)
         else:
+            self.total_produtos_catalogo = 0
             self.catalogo = pd.DataFrame(columns=['Linha', 'Grupo', 'NCM', 'ncm'])
 
         self.caracteristicas = _ler_resultado('caracteristicas_paises.csv', index_col=0)
@@ -248,7 +250,8 @@ class Dados:
         com = int((r['caso_final'] != 'nunca exportou').sum())
         ncms_catalogo = set(self.catalogo['ncm'])
         return {
-            'produtos': len(self.ncms),
+            'ncms': len(self.ncms),
+            'produtos_catalogo': self.total_produtos_catalogo,
             'paises': r['Países'].nunique(),
             'pares': len(r),
             'com_recomendacao': com,
@@ -343,7 +346,6 @@ class Dados:
                 'pais': pais,
                 'valor': total,
                 'kg': kg,
-                'preco_kg': total / kg if kg else None,
                 'anos_com': len(anos_com),
                 'ultimo_ano': anos_com[-1] if anos_com else None,
             })

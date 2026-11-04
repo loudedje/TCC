@@ -2,7 +2,7 @@
 {% from '_macros.html' import caso, pais with context %}
 
 {% block titulo %}NCM {{ p.ncm }}{% endblock %}
-{% block caminho %}<div class="caminho"><a href="{{ url_for('produtos') }}">Produtos</a> › NCM {{ p.ncm }}</div>{% endblock %}
+{% block caminho %}<div class="caminho"><a href="{{ url_for('produtos') }}">Produtos por NCM</a> › NCM {{ p.ncm }}</div>{% endblock %}
 {% block cabecalho %}{{ p.descricao }}{% endblock %}
 {% block intro %}
   <p class="intro">
@@ -67,8 +67,6 @@
     </label>
   </div>
   <div class="grafico"><canvas id="grafico-serie"></canvas></div>
-  <p class="nota" style="margin-top: 8px">Em "Realçar países pequenos" os mercados com valores baixos ficam visíveis ao
-  lado dos grandes, e os anos sem compra aparecem como falhas na linha.</p>
 </section>
 
 <section>
@@ -81,7 +79,6 @@
           <th class="ordenavel num">Valor total</th>
           <th class="ordenavel num">Participação</th>
           <th class="ordenavel num">Quilos</th>
-          <th class="ordenavel num">US$/kg</th>
           <th class="ordenavel num">Anos com compra</th>
           <th class="ordenavel num">Último ano</th>
         </tr>
@@ -93,7 +90,6 @@
             <td class="num" data-valor="{{ item.valor }}">{{ item.valor|moeda }}</td>
             <td class="num" data-valor="{{ item.valor }}">{{ (item.valor / p.valor_total * 100)|numero(1) ~ '%' if p.valor_total else '—' }}</td>
             <td class="num" data-valor="{{ item.kg }}">{{ item.kg|numero }}</td>
-            <td class="num" data-valor="{{ item.preco_kg or 0 }}">{{ item.preco_kg|numero(2) if item.preco_kg else '—' }}</td>
             <td class="num" data-valor="{{ item.anos_com }}">{{ item.anos_com }} de {{ p.anos|length }}</td>
             <td class="num" data-valor="{{ item.ultimo_ano or 0 }}">{{ item.ultimo_ano or '—' }}</td>
           </tr>
@@ -104,8 +100,8 @@
 </section>
 
 <div class="navegacao">
-  {% if p.anterior %}<a href="{{ url_for('produto', ncm=p.anterior) }}">‹ Produto anterior</a>{% else %}<span></span>{% endif %}
-  {% if p.proximo %}<a href="{{ url_for('produto', ncm=p.proximo) }}">Próximo produto ›</a>{% endif %}
+  {% if p.anterior %}<a href="{{ url_for('produto', ncm=p.anterior) }}">‹ NCM anterior</a>{% else %}<span></span>{% endif %}
+  {% if p.proximo %}<a href="{{ url_for('produto', ncm=p.proximo) }}">Próximo NCM ›</a>{% endif %}
 </div>
 {% endblock %}
 

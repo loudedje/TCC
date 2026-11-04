@@ -11,9 +11,9 @@
 {% endblock %}
 {% block cabecalho %}{{ p.nome }}{% endblock %}
 {% block intro %}
-  <p class="intro">Comprou {{ p.valor_total|moeda }} do Brasil nos produtos do catálogo ({{ periodo }}). É o mercado
-  nº 1 em {{ p.primeiros }} dos {{ p.produtos|length }} produtos, já compra {{ p.com_historico }} deles
-  {%- if p.herdados %} e tem {{ p.herdados }} oportunidades em produtos que ainda não compra{% endif %}.</p>
+  <p class="intro">Comprou {{ p.valor_total|moeda }} do Brasil nos NCMs do catálogo ({{ periodo }}). É o mercado
+  nº 1 em {{ p.primeiros }} dos {{ p.produtos|length }} NCMs, já compra {{ p.com_historico }} deles
+  {%- if p.herdados %} e tem {{ p.herdados }} oportunidades em NCMs que ainda não compra{% endif %}.</p>
 {% endblock %}
 
 {% block conteudo %}
@@ -59,7 +59,7 @@
           <li>{{ pais(outro.nome) }}</li>
         {% endfor %}
       </ol>
-      <p class="nota" style="margin-top: 8px">Do mais parecido para o menos parecido. Um produto que {{ p.nome }} já
+      <p class="nota" style="margin-top: 8px">Do mais parecido para o menos parecido. Um NCM que {{ p.nome }} já
       compra vira oportunidade nos dois primeiros desta lista, se eles ainda não comprarem.</p>
     {% else %}
       <p class="nota">Sem dados de indicadores.</p>
@@ -67,9 +67,9 @@
   </section>
 
   <section>
-    <h2>Situação dos produtos neste mercado</h2>
+    <h2>Situação dos NCMs neste mercado</h2>
     <table class="tabela">
-      <thead><tr><th>Situação</th><th class="num">Produtos</th></tr></thead>
+      <thead><tr><th>Situação</th><th class="num">NCMs</th></tr></thead>
       <tbody>
         {% for nome, n in p.casos.items() %}
           <tr><td>{{ caso(nome) }}</td><td class="num">{{ n }}</td></tr>
@@ -81,12 +81,12 @@
 
 <section>
   <h2>Importações do Brasil por ano</h2>
-  <p class="nota">Soma dos produtos do catálogo, em US$ FOB.</p>
+  <p class="nota">Soma dos NCMs do catálogo, em US$ FOB.</p>
   <div class="grafico baixo"><canvas id="grafico-anos"></canvas></div>
 </section>
 
 <section>
-  <h2>Prioridade de {{ p.nome }} em cada produto</h2>
+  <h2>Prioridade de {{ p.nome }} em cada NCM</h2>
   <div class="filtros">
     <select id="filtro-posicao" aria-label="Prioridade">
       <option value="">Todas as prioridades</option>
@@ -99,7 +99,7 @@
         <tr>
           <th class="ordenavel num">Prioridade</th>
           <th class="ordenavel">NCM</th>
-          <th class="ordenavel">Produto</th>
+          <th class="ordenavel">Descrição do NCM</th>
           <th class="ordenavel">Situação</th>
           <th class="ordenavel num">Anos com compra</th>
           <th class="ordenavel num">Comprado do Brasil</th>

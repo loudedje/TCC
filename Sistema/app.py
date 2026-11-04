@@ -9,8 +9,10 @@ Como o Flask funciona, em resumo:
      e devolve a página pronta para o navegador.
 
 Para rodar:  python app.py   e abrir http://localhost:5000
+Em produção quem chama o aplicativo é o uWSGI, pelo arquivo wsgi.py (ver DEPLOY.md).
 """
 import math
+import os
 import secrets
 from datetime import datetime
 
@@ -47,9 +49,12 @@ class JSONComNumpy(DefaultJSONProvider):
         return DefaultJSONProvider.default(objeto)
 
 
+PRODUCAO = os.environ.get('PRODUCAO') == '1'  # o wsgi.py liga isto no servidor
+
 app = Flask(__name__)                    # o aplicativo; tudo abaixo se pendura nele
 app.json = JSONComNumpy(app)             # usa o conversor de JSON acima
-app.secret_key = secrets.token_hex(16)   # chave interna exigida pelo Flask
+# chave interna exigida pelo Flask; sem a variável, gera uma nova a cada início
+app.secret_key = os.environ.get('FLASK_SECRET_KEY') or secrets.token_hex(16)
 
 dados = Dados()  # carrega os CSVs uma vez só; todas as páginas usam este objeto
 
@@ -61,11 +66,15 @@ dados = Dados()  # carrega os CSVs uma vez só; todas as páginas usam este obje
 # no Flask para ser chamada num momento específico. A função em si é
 # Python normal.
 
-@app.before_request  # roda antes de toda requisição
 def conferir_arquivos():
     """Se algum notebook regravou os CSVs, relê antes de montar a página."""
     if request.endpoint != 'static':  # 'static' = arquivos CSS/JS/imagens, não precisa
         dados.atualizar_se_mudou()
+
+
+# No servidor os notebooks não rodam: os dados só mudam com um Reload do web app.
+if not PRODUCAO:
+    app.before_request(conferir_arquivos)  # roda antes de toda requisição
 
 
 # ======================================================================
@@ -77,8 +86,8 @@ def conferir_arquivos():
 MENU = [
     ('Mercados', [
         ('painel', 'Visão geral', 'painel'),
-        ('produtos', 'Produtos', 'caixa'),
-        ('ranking', 'Ranking por produto', 'grade'),
+        ('produtos', 'Produtos por NCM', 'caixa'),
+        ('ranking', 'Ranking por NCM', 'grade'),
         ('paises', 'Países', 'globo'),
         ('perfil_parecido', 'Perfil parecido entre mercados', 'rede'),
     ]),
@@ -227,6 +236,7 @@ def produtos():
     linha_escolhida = request.args.get('linha', '')
     return render_template(
         'produtos.html',
+        resumo=dados.resumo(),
         produtos=dados.produtos_lista(),
         linhas=linhas_do_catalogo(),
         linha_escolhida=linha_escolhida,
@@ -343,7 +353,8 @@ def nao_encontrado(_erro):
 # ======================================================================
 # Este bloco só roda quando você executa "python app.py" diretamente.
 # debug=True recarrega o servidor sozinho quando você salva o código
-# e mostra os erros detalhados no navegador.
+# e mostra os erros detalhados no navegador. Nunca ligar numa URL pública:
+# a página de erro do debug permite executar Python no servidor.
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=not PRODUCAO, port=5000)

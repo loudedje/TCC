@@ -38,7 +38,7 @@
       <thead>
         <tr>
           <th>País</th>
-          <th class="num">Produtos em que é mercado nº 1 ou nº 2</th>
+          <th class="num">NCMs em que é mercado nº 1 ou nº 2</th>
           <th class="num">Empresas</th>
         </tr>
       </thead>
@@ -87,6 +87,7 @@
               <strong>{{ c.nome }}</strong>
               {% if unidades > 1 %}<br><span class="nota">rede com {{ unidades }} lojas</span>{% endif %}
               {% if 'AGT' in (c.fonte or '') %}<br><span class="selo">importador certificado</span>{% endif %}
+              {% if c.site %}<br><a href="{{ c.site }}" target="_blank" rel="noopener">site da empresa</a>{% endif %}
             </td>
             <td data-valor="{{ c.pais }}">{{ pais(c.pais) }}</td>
             <td data-valor="{{ c.canal }}">{{ c.canal|capitalize }}</td>

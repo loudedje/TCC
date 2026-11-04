@@ -4,7 +4,7 @@
 {% block titulo %}Países{% endblock %}
 {% block cabecalho %}Países PALOP{% endblock %}
 {% block intro %}
-  <p class="intro">O perfil econômico de cada mercado e a situação dele nos produtos do catálogo. Clique num país para
+  <p class="intro">O perfil econômico de cada mercado e a situação dele nos NCMs do catálogo. Clique num país para
   ver o perfil completo.</p>
 {% endblock %}
 
@@ -36,8 +36,8 @@
 </section>
 
 <section>
-  <h2>Situação nos produtos do catálogo</h2>
-  <p class="nota">Em quantos dos {{ paises[0].casos.values()|sum }} produtos cada país está em cada situação.</p>
+  <h2>Situação nos NCMs do catálogo</h2>
+  <p class="nota">Em quantos dos {{ paises[0].casos.values()|sum }} NCMs cada país está em cada situação.</p>
   <div class="rolagem">
     <table class="tabela">
       <thead>
@@ -61,6 +61,6 @@
     </table>
   </div>
   <p class="nota" style="margin-top: 8px">As oportunidades novas já estão contadas nas colunas de situação: são
-  produtos que o país ainda não compra, mas que um país de perfil parecido já compra.</p>
+  NCMs que o país ainda não compra, mas que um país de perfil parecido já compra.</p>
 </section>
 {% endblock %}
