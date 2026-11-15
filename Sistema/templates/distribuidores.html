@@ -64,7 +64,9 @@
     </select>
     <select id="filtro-canal" aria-label="Canal">
       <option value="">Todos os canais</option>
-      {% for canal in canais %}<option value="{{ canal }}">{{ canal|capitalize }}</option>{% endfor %}
+      <option value="varejo">Varejo</option>
+      <option value="distribuidor">Distribuidor</option>
+      <option value="ambos">Ambos (atacado e varejo)</option>
     </select>
     <span class="nota contador" id="contador"></span>
   </div>
