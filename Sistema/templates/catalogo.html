@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block titulo %}Catálogo{% endblock %}
-{% block cabecalho %}Catálogo Apti{% endblock %}
+{% block cabecalho %}Catálogo{% endblock %}
 {% block intro %}
-  <p class="intro">As linhas de produtos da Apti e os códigos NCM de cada uma. {% if linhas %}São {{ linhas|length }} linhas, {{ linhas|map(attribute='grupos')|map('length')|sum }} grupos, {{ resumo.produtos_catalogo }} produtos
+  <p class="intro">As linhas de produtos da empresa e os códigos NCM de cada uma. {% if linhas %}São {{ linhas|length }} linhas, {{ linhas|map(attribute='grupos')|map('length')|sum }} grupos, {{ resumo.produtos_catalogo }} produtos
   e {{ resumo.ncms_catalogo }} NCMs diferentes{% if resumo.ncms_catalogo_cobertos < resumo.ncms_catalogo %},
   dos quais {{ resumo.ncms_catalogo_cobertos }} têm vendas do Brasil aos PALOP{% endif %}. Clique num NCM para ver
   os mercados prioritários.{% endif %}</p>

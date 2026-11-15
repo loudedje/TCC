@@ -4,7 +4,7 @@
 {% block titulo %}Distribuidores{% endblock %}
 {% block cabecalho %}Distribuidores{% endblock %}
 {% block intro %}
-  <p class="intro">Empresas do setor alimentício nos cinco PALOP que podem distribuir os produtos da Apti. Como o
+  <p class="intro">Empresas do setor alimentício nos cinco PALOP que podem distribuir os produtos da empresa. Como o
   catálogo é todo de alimento seco, o mesmo distribuidor atende qualquer produto. Os países mais promissores aparecem
   primeiro.</p>
 {% endblock %}
@@ -30,9 +30,8 @@
 
 <section>
   <h2>Empresas por país</h2>
-  <p class="nota">Angola publica a lista oficial de importadores certificados pela alfândega e tem mais empresas
-  mapeadas, por isso aparece com mais nomes. Nos outros países há menos informação pública: poucos nomes aqui não
-  significam mercado pequeno, e sim que a prospecção ali exige mais pesquisa local.</p>
+  <p class="nota">Poucos nomes em um país não significam mercado pequeno, e sim que ele está menos mapeado no
+  OpenStreetMap. Nesses países, a prospecção exige mais pesquisa local.</p>
   <div class="rolagem">
     <table class="tabela">
       <thead>
@@ -86,7 +85,6 @@
             <td>
               <strong>{{ c.nome }}</strong>
               {% if unidades > 1 %}<br><span class="nota">rede com {{ unidades }} lojas</span>{% endif %}
-              {% if 'AGT' in (c.fonte or '') %}<br><span class="selo">importador certificado</span>{% endif %}
               {% if c.site %}<br><a href="{{ c.site }}" target="_blank" rel="noopener">site da empresa</a>{% endif %}
             </td>
             <td data-valor="{{ c.pais }}">{{ pais(c.pais) }}</td>
@@ -97,9 +95,8 @@
     </table>
   </div>
   <p class="nota" id="sem-resultado" hidden>Nenhuma empresa com esses filtros.</p>
-  <p class="nota" style="margin-top: 10px">Os nomes vêm de fontes públicas (lista de importadores certificados da
-  alfândega de Angola e OpenStreetMap). São empresas para prospectar: o interesse e as condições comerciais precisam
-  ser confirmados no contato.</p>
+  <p class="nota" style="margin-top: 10px">Os nomes vêm do OpenStreetMap, uma fonte pública. São empresas para
+  prospectar: o interesse e as condições comerciais precisam ser confirmados no contato.</p>
 </section>
 {% endif %}
 {% endblock %}

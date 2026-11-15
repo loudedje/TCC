@@ -7,7 +7,7 @@
 {% block intro %}
   <p class="intro">
     NCM {{ p.ncm }} · {{ p.valor_total|moeda }} exportados aos PALOP entre {{ periodo }}
-    {%- if p.catalogo %} · Catálogo Apti:
+    {%- if p.catalogo %} · Catálogo da empresa:
       {% for item in p.catalogo -%}
         <a href="{{ url_for('produtos', linha=item.Linha) }}">{{ item.Linha|title }}</a> ({{ item.Grupo|title }}){{ ', ' if not loop.last }}
       {%- endfor %}
@@ -26,7 +26,6 @@
           <th>País</th>
           <th>Situação</th>
           <th>Por quê</th>
-          <th class="num">Comprado do Brasil</th>
         </tr>
       </thead>
       <tbody>
@@ -39,7 +38,6 @@
               {% if linha.herdado == 1 %}<br><span class="herdado">oportunidade: perfil parecido com {{ (linha.parecidos_que_compram or [linha.herdado_de])|join(' e ') }}</span>{% endif %}
             </td>
             <td>{{ linha.motivo }}</td>
-            <td class="num">{{ linha.valor_total|moeda if linha.valor_total else '—' }}</td>
           </tr>
         {% endfor %}
       </tbody>
@@ -56,7 +54,6 @@
     <label>Medida
       <select id="medida">
         <option value="valor">US$ FOB</option>
-        <option value="kg">Quilograma líquido</option>
       </select>
     </label>
     <label>Visualização
@@ -67,36 +64,6 @@
     </label>
   </div>
   <div class="grafico"><canvas id="grafico-serie"></canvas></div>
-</section>
-
-<section>
-  <h2>Vendas do Brasil por país</h2>
-  <div class="rolagem">
-    <table class="tabela">
-      <thead>
-        <tr>
-          <th class="ordenavel">País</th>
-          <th class="ordenavel num">Valor total</th>
-          <th class="ordenavel num">Participação</th>
-          <th class="ordenavel num">Quilos</th>
-          <th class="ordenavel num">Anos com compra</th>
-          <th class="ordenavel num">Último ano</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in p.por_pais %}
-          <tr>
-            <td>{{ pais(item.pais) }}</td>
-            <td class="num" data-valor="{{ item.valor }}">{{ item.valor|moeda }}</td>
-            <td class="num" data-valor="{{ item.valor }}">{{ (item.valor / p.valor_total * 100)|numero(1) ~ '%' if p.valor_total else '—' }}</td>
-            <td class="num" data-valor="{{ item.kg }}">{{ item.kg|numero }}</td>
-            <td class="num" data-valor="{{ item.anos_com }}">{{ item.anos_com }} de {{ p.anos|length }}</td>
-            <td class="num" data-valor="{{ item.ultimo_ano or 0 }}">{{ item.ultimo_ano or '—' }}</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
 </section>
 
 <div class="navegacao">

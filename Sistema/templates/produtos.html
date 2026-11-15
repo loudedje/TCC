@@ -24,7 +24,6 @@
     <option value="">Qualquer mercado nº 1</option>
     {% for nome in PAISES.values() %}<option value="{{ nome }}">{{ nome }}</option>{% endfor %}
   </select>
-  <label><input type="checkbox" id="filtro-heranca"> Só com oportunidade em mercado novo</label>
   <span class="nota contador" id="contador"></span>
 </div>
 
@@ -34,7 +33,7 @@
       <tr>
         <th class="ordenavel">NCM</th>
         <th class="ordenavel">Descrição do NCM</th>
-        <th class="ordenavel">Linha Apti</th>
+        <th class="ordenavel">Linha da empresa</th>
         <th>Mercado nº 1</th>
         <th>Mercado nº 2</th>
         <th class="ordenavel num">Países que já compram</th>
@@ -45,8 +44,7 @@
         <tr data-href="{{ url_for('produto', ncm=p.ncm) }}"
             data-texto="{{ (p.ncm ~ ' ' ~ p.descricao)|lower }}"
             data-linhas="{{ p.linhas|join('|') }}"
-            data-primeiro="{{ p.primeiro }}"
-            data-heranca="{{ p.herdados }}">
+            data-primeiro="{{ p.primeiro }}">
           <td class="cod">{{ p.ncm }}</td>
           <td title="{{ p.descricao }}">{{ p.descricao|curto(64) }}</td>
           <td>{{ p.linhas|map('title')|join(', ') or '—' }}</td>
@@ -67,7 +65,6 @@
   const busca = document.getElementById('busca');
   const linha = document.getElementById('filtro-linha');
   const pais = document.getElementById('filtro-pais');
-  const heranca = document.getElementById('filtro-heranca');
   const linhas = Array.from(document.querySelectorAll('#tabela-produtos tbody tr'));
 
   function filtrar() {
@@ -79,7 +76,6 @@
       if (linha.value === '__fora') ok = ok && linhasProduto.length === 0;
       else if (linha.value) ok = ok && linhasProduto.includes(linha.value);
       if (pais.value) ok = ok && tr.dataset.primeiro === pais.value;
-      if (heranca.checked) ok = ok && tr.dataset.heranca !== '0';
       tr.hidden = !ok;
       if (ok) visiveis++;
     });
@@ -87,7 +83,7 @@
     document.getElementById('contador').textContent = `${visiveis} de ${linhas.length} NCMs`;
   }
 
-  [busca, linha, pais, heranca].forEach(el => el.addEventListener('input', filtrar));
+  [busca, linha, pais].forEach(el => el.addEventListener('input', filtrar));
   filtrar();
 </script>
 {% endblock %}

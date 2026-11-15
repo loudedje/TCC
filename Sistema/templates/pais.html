@@ -102,7 +102,6 @@
           <th class="ordenavel">Descrição do NCM</th>
           <th class="ordenavel">Situação</th>
           <th class="ordenavel num">Anos com compra</th>
-          <th class="ordenavel num">Comprado do Brasil</th>
         </tr>
       </thead>
       <tbody>
@@ -116,7 +115,6 @@
               {% if item.herdado %}<br><span class="herdado">oportunidade: perfil parecido com {{ (item.parecidos_que_compram or [item.herdado_de])|join(' e ') }}</span>{% endif %}
             </td>
             <td class="num" data-valor="{{ item.anos_ativos }}">{{ item.anos_ativos }}</td>
-            <td class="num" data-valor="{{ item.valor }}">{{ item.valor|moeda }}</td>
           </tr>
         {% endfor %}
       </tbody>

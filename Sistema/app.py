@@ -93,7 +93,7 @@ MENU = [
     ]),
     ('Comercial', [
         ('distribuidores', 'Distribuidores', 'alvo'),
-        ('catalogo', 'Catálogo Apti', 'livro'),
+        ('catalogo', 'Catálogo', 'livro'),
     ]),
 ]
 
