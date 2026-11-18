@@ -259,7 +259,8 @@ def paises():
         'paises.html',
         paises=dados.paises_resumo(),
         caracteristicas=dados.caracteristicas,
-        variaveis=VARIAVEIS_SIMILARIDADE,
+        # só para exibir: inclui a inflação, que NÃO entra na similaridade
+        variaveis=list(INDICADORES),
     )
 
 
